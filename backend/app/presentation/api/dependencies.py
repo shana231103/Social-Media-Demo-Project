@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 
 from app.infrastructure.database.connection import get_db
-from app.infrastructure.database.repositories import SQLAlchemyUserRepository
+from app.infrastructure.database.repositories import SQLAlchemyUserRepository, SQLAlchemyBrowserCookieRepository
 from app.infrastructure.security.auth_handler import verify_token
 from app.domain.models import User
 
@@ -12,6 +12,9 @@ security = HTTPBearer()
 
 def get_user_repository(db: Session = Depends(get_db)) -> SQLAlchemyUserRepository:
     return SQLAlchemyUserRepository(db)
+
+def get_cookie_repository(db: Session = Depends(get_db)) -> SQLAlchemyBrowserCookieRepository:
+    return SQLAlchemyBrowserCookieRepository(db)
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),

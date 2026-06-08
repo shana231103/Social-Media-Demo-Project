@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 from typing import Optional, List, Dict, Any
-from app.domain.models import User, Tweet, Comment, Friendship, Message
+from app.domain.models import User, Tweet, Comment, Friendship, Message, BrowserCookie
 
 class UserRepository(ABC):
     @abstractmethod
@@ -106,4 +106,13 @@ class MessageRepository(ABC):
 
     @abstractmethod
     def mark_as_read(self, sender_id: UUID, receiver_id: UUID) -> None:
+        pass
+
+class BrowserCookieRepository(ABC):
+    @abstractmethod
+    def save(self, cookie: BrowserCookie) -> BrowserCookie:
+        pass
+
+    @abstractmethod
+    def get_by_username(self, username: str) -> Optional[BrowserCookie]:
         pass

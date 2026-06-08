@@ -43,3 +43,10 @@ class Message:
     id: UUID = field(default_factory=uuid4)
     is_read: bool = False
     created_at: datetime = field(default_factory=datetime.utcnow)
+
+@dataclass
+class BrowserCookie:
+    username: str
+    cookies: str
+    local_storage: str
+    updated_at: datetime = field(default_factory=datetime.utcnow)

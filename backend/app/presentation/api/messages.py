@@ -31,7 +31,7 @@ def get_chat_history(
     return use_case.execute(current_user.id, other_user_id)
 
 @router.post("", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
-def send_message(
+async def send_message(
     request: MessageCreateRequest,
     current_user: User = Depends(get_current_user),
     message_repo: SQLAlchemyMessageRepository = Depends(get_message_repo),
@@ -53,10 +53,9 @@ def send_message(
                 "created_at": msg.created_at.isoformat()
             }
         }
-        import asyncio
         serialized = json.dumps(msg_payload)
-        asyncio.create_task(manager.send_personal_message(serialized, msg.sender_id))
-        asyncio.create_task(manager.send_personal_message(serialized, msg.receiver_id))
+        await manager.send_personal_message(serialized, msg.sender_id)
+        await manager.send_personal_message(serialized, msg.receiver_id)
         
         return msg
     except Exception as e:

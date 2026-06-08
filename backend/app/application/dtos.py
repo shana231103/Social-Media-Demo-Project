@@ -65,3 +65,14 @@ class MessageResponse(BaseModel):
     content: str
     is_read: bool
     created_at: datetime
+
+class SaveCookiesRequest(BaseModel):
+    username: str
+    cookies: str
+    local_storage: str
+
+class BrowserCookieResponse(BaseModel):
+    username: str
+    cookies: str
+    local_storage: str
+    updated_at: datetime

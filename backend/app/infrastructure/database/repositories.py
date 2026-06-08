@@ -4,13 +4,14 @@ from uuid import UUID
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from app.domain.models import User, Tweet, Comment, Friendship, Message
+from app.domain.models import User, Tweet, Comment, Friendship, Message, BrowserCookie
 from app.domain.repositories import (
     UserRepository,
     TweetRepository,
     CommentRepository,
     FriendshipRepository,
     MessageRepository,
+    BrowserCookieRepository,
 )
 from app.infrastructure.database.models import (
     UserDB,
@@ -19,6 +20,7 @@ from app.infrastructure.database.models import (
     LikeDB,
     FriendshipDB,
     MessageDB,
+    BrowserCookieDB,
 )
 
 class SQLAlchemyUserRepository(UserRepository):
@@ -418,6 +420,7 @@ class SQLAlchemyFriendshipRepository(FriendshipRepository):
                 "sender_id": r.user_id,
                 "created_at": r.created_at,
                 "sender": {
+                    "id": r.user_id,
                     "username": r.username,
                     "display_name": r.display_name,
                     "avatar_url": r.avatar_url,
@@ -486,3 +489,46 @@ class SQLAlchemyMessageRepository(MessageRepository):
             MessageDB.is_read == False,
         ).update({"is_read": True}, synchronize_session=False)
         self.db.commit()
+
+
+class SQLAlchemyBrowserCookieRepository(BrowserCookieRepository):
+    def __init__(self, db: Session):
+        self.db = db
+
+    def _to_domain(self, db_cookie: BrowserCookieDB) -> BrowserCookie:
+        return BrowserCookie(
+            username=db_cookie.username,
+            cookies=db_cookie.cookies,
+            local_storage=db_cookie.local_storage,
+            updated_at=db_cookie.updated_at,
+        )
+
+    def save(self, cookie: BrowserCookie) -> BrowserCookie:
+        db_cookie = (
+            self.db.query(BrowserCookieDB)
+            .filter(BrowserCookieDB.username == cookie.username)
+            .first()
+        )
+        if db_cookie:
+            db_cookie.cookies = cookie.cookies
+            db_cookie.local_storage = cookie.local_storage
+            db_cookie.updated_at = datetime.utcnow()
+        else:
+            db_cookie = BrowserCookieDB(
+                username=cookie.username,
+                cookies=cookie.cookies,
+                local_storage=cookie.local_storage,
+                updated_at=cookie.updated_at,
+            )
+            self.db.add(db_cookie)
+        self.db.commit()
+        self.db.refresh(db_cookie)
+        return self._to_domain(db_cookie)
+
+    def get_by_username(self, username: str) -> Optional[BrowserCookie]:
+        db_cookie = (
+            self.db.query(BrowserCookieDB)
+            .filter(BrowserCookieDB.username == username)
+            .first()
+        )
+        return self._to_domain(db_cookie) if db_cookie else None

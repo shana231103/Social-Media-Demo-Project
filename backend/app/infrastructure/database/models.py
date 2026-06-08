@@ -68,3 +68,11 @@ class MessageDB(Base):
     content = Column(Text, nullable=False)
     is_read = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+class BrowserCookieDB(Base):
+    __tablename__ = "browser_cookies"
+    username = Column(String(100), primary_key=True)
+    cookies = Column(Text, nullable=False)
+    local_storage = Column(Text, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
